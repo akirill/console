@@ -307,9 +307,36 @@ void ConsoleHandler::UpdateEnvironmentBlock()
 
 	::OpenProcessToken(::GetCurrentProcess(), TOKEN_ALL_ACCESS, &hProcessToken);
 	::CreateEnvironmentBlock(&pEnvironment, hProcessToken, FALSE);
-	::CloseHandle(hProcessToken);
 
-	s_environmentBlock.reset(pEnvironment, ::DestroyEnvironmentBlock);
+	DWORD dwSize = 0;
+	void *pExpanded = malloc(_MAX_ENV * sizeof(TCHAR));
+	TCHAR *pszNew = (TCHAR *)pEnvironment, *pszExpanded = (TCHAR *)pExpanded;
+	while (*pszNew)
+	{
+		if (!::ExpandEnvironmentStringsForUser(hProcessToken, pszNew, pszExpanded, _MAX_ENV))
+		{
+			// if somehow it fails, just copy unexpanded string over
+			_tcscpy_s(pszExpanded, dwSize + _MAX_ENV, pszNew);
+		}
+
+		DWORD dwNewSize = _tcslen(pszExpanded);
+		dwSize += dwNewSize + 1;
+
+		// reallocate buffer to be big enough for _MAX_ENV chars next time
+		pExpanded = realloc(pExpanded, (dwSize + _MAX_ENV) * sizeof(TCHAR));
+		pszExpanded = ((TCHAR *)pExpanded) + dwSize;
+
+		pszNew += _tcslen(pszNew) + 1;
+	}
+
+	// put the closing (second) NULL terminator at the end of the block
+	*pszExpanded = 0;
+	pExpanded = realloc(pExpanded, (dwSize + 1) * sizeof(TCHAR));
+
+	::CloseHandle(hProcessToken);
+	::DestroyEnvironmentBlock(pEnvironment);
+
+	s_environmentBlock.reset(pExpanded, free);
 }
 
 //////////////////////////////////////////////////////////////////////////////
