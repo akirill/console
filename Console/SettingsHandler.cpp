@@ -898,7 +898,7 @@ bool TabHighlightSettings::Load(const CComPtr<IXMLDOMElement>& pSettingsRoot)
 {
 	CComPtr<IXMLDOMElement>	pTabElement;
 
-	if (FAILED(XmlHelper::GetDomElement(pSettingsRoot, CComBSTR(L"behavior/tab_highlight"), pTabElement))) return false;
+	if (FAILED(XmlHelper::CreateDomElement(pSettingsRoot, CString(L"behavior/tab_highlight"), pTabElement))) return false;
 
 	XmlHelper::GetAttribute(pTabElement, CComBSTR(L"flashes"), dwFlashes, 0);
 	XmlHelper::GetAttribute(pTabElement, CComBSTR(L"stay_highligted"), bStayHighlighted, false);
