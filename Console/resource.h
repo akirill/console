@@ -20,6 +20,7 @@
 #define IDD_SETTINGS_TABS_1             213
 #define IDD_SETTINGS_TABS_2             214
 #define IDD_SETTINGS_MOUSE              215
+#define IDR_SYSTEM_MENU                 216
 #define IDC_TAB_NAME                    1000
 #define IDC_APPLY                       1001
 #define IDC_TREE_SECTIONS               1002

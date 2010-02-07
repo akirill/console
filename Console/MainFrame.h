@@ -217,6 +217,8 @@ class MainFrame
 		void CreateStatusBar();
 		BOOL SetTrayIcon(DWORD dwMessage);
 
+		void UpdateSystemMenu();
+
 	private:
 
 		bool					m_bOnCreateDone;
