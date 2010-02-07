@@ -672,49 +672,37 @@ LRESULT MainFrame::OnWindowPosChanging(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM 
 		
 		if (positionSettings.nSnapDistance >= 0)
 		{
-			CRect	rectMonitor;
 			CRect	rectDesktop;
-			CRect	rectWindow;
-			CPoint	pointCursor;
 
 			// we'll snap Console window to the desktop edges
-			::GetCursorPos(&pointCursor);
-			GetWindowRect(&rectWindow);
-			Helpers::GetDesktopRect(pointCursor, rectDesktop);
-			Helpers::GetMonitorRect(m_hWnd, rectMonitor);
-
-			if (!rectMonitor.PtInRect(pointCursor))
-			{
-				pWinPos->x = pointCursor.x;
-				pWinPos->y = pointCursor.y;
-			}
+			Helpers::GetDesktopRect(CRect(pWinPos->x, pWinPos->y, pWinPos->x + pWinPos->cx, pWinPos->y + pWinPos->cy), rectDesktop);
 
 			int	nLR = -1;
 			int	nTB = -1;
 
-			// now, see if we're close to the edges
+			// now, see if we're close to the edges, give priorities to top-left corner
+			if (pWinPos->x >= rectDesktop.right - pWinPos->cx - positionSettings.nSnapDistance)
+			{
+				pWinPos->x = rectDesktop.right - pWinPos->cx;
+				nLR = 1;
+			}
+
 			if (pWinPos->x <= rectDesktop.left + positionSettings.nSnapDistance)
 			{
 				pWinPos->x = rectDesktop.left;
 				nLR = 0;
 			}
 			
-			if (pWinPos->x >= rectDesktop.right - rectWindow.Width() - positionSettings.nSnapDistance)
+			if (pWinPos->y >= rectDesktop.bottom - pWinPos->cy - positionSettings.nSnapDistance)
 			{
-				pWinPos->x = rectDesktop.right - rectWindow.Width();
-				nLR = 1;
+				pWinPos->y = rectDesktop.bottom - pWinPos->cy;
+				nTB = 2;
 			}
-			
+
 			if (pWinPos->y <= rectDesktop.top + positionSettings.nSnapDistance)
 			{
 				pWinPos->y = rectDesktop.top;
 				nTB = 0;
-			}
-			
-			if (pWinPos->y >= rectDesktop.bottom - rectWindow.Height() - positionSettings.nSnapDistance)
-			{
-				pWinPos->y = rectDesktop.bottom - rectWindow.Height();
-				nTB = 2;
 			}
 
 			if ((nLR != -1) && (nTB != -1))

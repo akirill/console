@@ -71,6 +71,12 @@ void Helpers::GetDesktopRect(const CPoint& point, CRect& rectDesktop)
 	GetMonitorRect(hMonitor, false, rectDesktop);
 }
 
+void Helpers::GetDesktopRect(const CRect& rect, CRect& rectDesktop)
+{
+	HMONITOR hMonitor = ::MonitorFromRect(rect, MONITOR_DEFAULTTONEAREST);
+	GetMonitorRect(hMonitor, false, rectDesktop);
+}
+
 //////////////////////////////////////////////////////////////////////////////
 
 
