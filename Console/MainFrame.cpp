@@ -573,7 +573,7 @@ LRESULT MainFrame::OnGetMinMaxInfo(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM lPar
 
 //////////////////////////////////////////////////////////////////////////////
 
-LRESULT MainFrame::OnSize(UINT /*uMsg*/, WPARAM wParam, LPARAM lParam, BOOL& bHandled)
+LRESULT MainFrame::OnSize(UINT /*uMsg*/, WPARAM wParam, LPARAM /* lParam */, BOOL& bHandled)
 {
 	// Start timer that will force a call to ResizeWindow (called from WM_EXITSIZEMOVE handler
 	// when the Console window is resized using a mouse)
@@ -581,39 +581,8 @@ LRESULT MainFrame::OnSize(UINT /*uMsg*/, WPARAM wParam, LPARAM lParam, BOOL& bHa
 	// message after resizing a window.
 	SetTimer(TIMER_SIZING, TIMER_SIZING_INTERVAL);
 
-	if (wParam == SIZE_MAXIMIZED)
-	{
-		PostMessage(WM_EXITSIZEMOVE, 1, 0);
-	}
-	else if (m_bRestoringWindow && (wParam == SIZE_RESTORED))
-	{
+	if (m_bRestoringWindow && (wParam == SIZE_RESTORED))
 		m_bRestoringWindow = false;
-		PostMessage(WM_EXITSIZEMOVE, 1, 0);
-/*
-		CRect rectWindow;
-		GetWindowRect(&rectWindow);
-
-		DWORD dwWindowWidth	= LOWORD(lParam);
-		DWORD dwWindowHeight= HIWORD(lParam);
-
-		if ((dwWindowWidth != m_dwWindowWidth) ||
-			(dwWindowHeight != m_dwWindowHeight))
-		{
-//			AdjustWindowSize(true, (wParam == SIZE_MAXIMIZED));
-
-			CRect clientRect;
-			GetClientRect(&clientRect);
-			AdjustAndResizeConsoleView(clientRect);
-			AdjustWindowRect(clientRect);
-		}
-*/
-	}
-
-// 	CRect rectWindow;
-// 	GetWindowRect(&rectWindow);
-// 
-// 	TRACE(L"OnSize dims: %ix%i\n", rectWindow.Width(), rectWindow.Height());
-
 
 	bHandled = FALSE;
 	return 0;
@@ -797,7 +766,7 @@ LRESULT MainFrame::OnMouseMove(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM lParam, 
 
 //////////////////////////////////////////////////////////////////////////////
 
-LRESULT MainFrame::OnExitSizeMove(UINT /*uMsg*/, WPARAM wParam, LPARAM /*lParam*/, BOOL& /*bHandled*/)
+LRESULT MainFrame::OnExitSizeMove(UINT /*uMsg*/, WPARAM /* wParam */, LPARAM /*lParam*/, BOOL& /*bHandled*/)
 {
 	ResizeWindow();
 	return 0;
@@ -813,7 +782,11 @@ LRESULT MainFrame::OnTimer(UINT /*uMsg*/, WPARAM wParam, LPARAM /*lParam*/, BOOL
 	if (wParam == TIMER_SIZING)
 	{
 		KillTimer(TIMER_SIZING);
-		ResizeWindow();
+
+		// to be more explicit about the purpose of the timer,
+		// let's call exactly the method, the timer is supposed to replace
+		BOOL bHandled;
+		OnExitSizeMove(WM_EXITSIZEMOVE, 0, 0, bHandled);
 	}
 
 	return 0;
