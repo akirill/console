@@ -449,6 +449,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\DropFileTarget.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\Helpers.cpp"
 				>
 			</File>
@@ -583,6 +587,10 @@
 			</File>
 			<File
 				RelativePath=".\DlgSettingsTabs.h"
+				>
+			</File>
+			<File
+				RelativePath=".\DropFileTarget.h"
 				>
 			</File>
 			<File
