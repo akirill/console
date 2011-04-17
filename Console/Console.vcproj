@@ -687,6 +687,11 @@
 			Name="Help Files"
 			>
 			<File
+				RelativePath="..\help\console.chm"
+				DeploymentContent="true"
+				>
+			</File>
+			<File
 				RelativePath="..\help\console.hhc"
 				>
 			</File>
@@ -799,6 +804,7 @@
 		</Filter>
 		<File
 			RelativePath=".\console.xml"
+			DeploymentContent="true"
 			>
 		</File>
 		<File
