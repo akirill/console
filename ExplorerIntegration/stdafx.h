@@ -33,6 +33,8 @@
 #include "atlgdix.h"
 #pragma warning(pop)
 
+#pragma warning(disable: 4503) // disables 'name truncated' warnings
+
 #pragma warning(push)
 #pragma warning(disable: 4702)
 #include <iostream>
