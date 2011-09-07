@@ -6,11 +6,14 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Console", "Console\Console.
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{DA1A8A1D-90C0-49B9-A9B2-DF2C574F19E6}"
 	ProjectSection(SolutionItems) = preProject
+		setup\console-x64.iss = setup\console-x64.iss
 		setup\console.iss = setup\console.iss
 		devel_changes.txt = devel_changes.txt
 	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ConsoleWow", "ConsoleWow\ConsoleWow.vcproj", "{8A25E8AF-CC4A-4145-B878-3D99271562D4}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ExplorerIntegration", "ExplorerIntegration\ExplorerIntegration.vcproj", "{E7D4E116-30AE-46D6-A95D-14A71C3D65FD}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -42,6 +45,12 @@ Global
 		{8A25E8AF-CC4A-4145-B878-3D99271562D4}.Release|Win32.ActiveCfg = Release|Win32
 		{8A25E8AF-CC4A-4145-B878-3D99271562D4}.Release|Win32.Build.0 = Release|Win32
 		{8A25E8AF-CC4A-4145-B878-3D99271562D4}.Release|x64.ActiveCfg = Release|Win32
+		{E7D4E116-30AE-46D6-A95D-14A71C3D65FD}.Debug|Win32.ActiveCfg = Debug|Win32
+		{E7D4E116-30AE-46D6-A95D-14A71C3D65FD}.Debug|Win32.Build.0 = Debug|Win32
+		{E7D4E116-30AE-46D6-A95D-14A71C3D65FD}.Debug|x64.ActiveCfg = Debug|Win32
+		{E7D4E116-30AE-46D6-A95D-14A71C3D65FD}.Release|Win32.ActiveCfg = Release|Win32
+		{E7D4E116-30AE-46D6-A95D-14A71C3D65FD}.Release|Win32.Build.0 = Release|Win32
+		{E7D4E116-30AE-46D6-A95D-14A71C3D65FD}.Release|x64.ActiveCfg = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

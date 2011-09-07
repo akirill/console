@@ -465,6 +465,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\NTProcessInfo.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\PageSettingsTabs1.cpp"
 				>
 			</File>
@@ -550,6 +554,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\shared\Constants.h"
+				>
+			</File>
+			<File
 				RelativePath=".\Cursors.h"
 				>
 			</File>
@@ -615,6 +623,14 @@
 			</File>
 			<File
 				RelativePath=".\MainFrame.h"
+				>
+			</File>
+			<File
+				RelativePath="..\shared\Messages.h"
+				>
+			</File>
+			<File
+				RelativePath=".\NTProcessInfo.h"
 				>
 			</File>
 			<File
@@ -731,6 +747,10 @@
 				</File>
 				<File
 					RelativePath="..\help\html\running.html"
+					>
+				</File>
+				<File
+					RelativePath="..\help\html\settings.html"
 					>
 				</File>
 				<File

@@ -11,7 +11,12 @@
 // External utilities that might resize Console window usually don't send WM_EXITSIZEMOVE
 // message after resizing a window.
 #define	TIMER_SIZING			42
+#define	TIMER_TIMEOUT			43 // vds: Time id used to kill the client of the DDE communication when the DDE server don't responds.
 #define	TIMER_SIZING_INTERVAL	100
+
+const WORD WM_SEND_DDE_COMMAND = WM_APP + 1; // vds:
+
+//#define USE_COPYDATA_MSG // vds
 
 //////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////
@@ -42,6 +47,7 @@ class MainFrame
 			const vector<wstring>& startupDirs, 
 			const vector<wstring>& startupCmds, 
 			int nMultiStartSleep, 
+			bool bOneInstance, // vds:
 			const wstring& strDbgCmdLine
 		);
 
@@ -80,13 +86,24 @@ class MainFrame
 			MESSAGE_HANDLER(WM_EXITSIZEMOVE, OnExitSizeMove)
 			MESSAGE_HANDLER(WM_TIMER, OnTimer)
 			MESSAGE_HANDLER(WM_SETTINGCHANGE, OnSettingChange)
+// vds: >>			
+#ifdef USE_COPYDATA_MSG
+			MESSAGE_HANDLER(WM_COPYDATA, OnCopyData)
+#endif
+// vds: <<
 			MESSAGE_HANDLER(UM_CONSOLE_RESIZED, OnConsoleResized)
 			MESSAGE_HANDLER(UM_CONSOLE_CLOSED, OnConsoleClosed)
 			MESSAGE_HANDLER(UM_UPDATE_TITLES, OnUpdateTitles)
 			MESSAGE_HANDLER(UM_SHOW_POPUP_MENU, OnShowPopupMenu)
 			MESSAGE_HANDLER(UM_START_MOUSE_DRAG, OnStartMouseDrag)
 			MESSAGE_HANDLER(UM_TRAY_NOTIFY, OnTrayNotify)
-			
+			// vds: >>
+			MESSAGE_HANDLER(WM_SEND_DDE_COMMAND, OnSendDdeCommand)
+			MESSAGE_HANDLER(WM_DDE_INITIATE, OnDdeInitiate)
+			MESSAGE_HANDLER(WM_DDE_EXECUTE, OnDdeExecute)
+			MESSAGE_HANDLER(WM_DDE_ACK, OnDdeAck)
+			MESSAGE_HANDLER(WM_DDE_TERMINATE, OnDdeTerminate)
+			// vds: <<
 			NOTIFY_CODE_HANDLER(CTCN_SELCHANGE, OnTabChanged)
 			NOTIFY_CODE_HANDLER(CTCN_CLOSE, OnTabClose)
 			NOTIFY_CODE_HANDLER(CTCN_MCLICK, OnTabMiddleClick);
@@ -146,7 +163,11 @@ class MainFrame
 		LRESULT OnTimer(UINT /*uMsg*/, WPARAM wParam, LPARAM /*lParam*/, BOOL& /*bHandled*/);
 
 		LRESULT OnSettingChange(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM lParam, BOOL& /*bHandled*/);
-
+// vds: >>		
+#ifdef USE_COPYDATA_MSG
+		LRESULT OnCopyData(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM lParam, BOOL& /*bHandled*/);
+#endif
+// vds: <<
 		LRESULT OnConsoleResized(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/, BOOL& /* bHandled */);
 		LRESULT OnConsoleClosed(UINT /*uMsg*/, WPARAM wParam, LPARAM /*lParam*/, BOOL& /*bHandled*/);
 		LRESULT OnUpdateTitles(UINT /*uMsg*/, WPARAM wParam, LPARAM /*lParam*/, BOOL& /*bHandled*/);
@@ -188,12 +209,23 @@ class MainFrame
 		LRESULT OnAppAbout(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/);
 		LRESULT OnDumpBuffer(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/);
 
+		// vds: >>
+		LRESULT OnSendDdeCommand(UINT /*uMsg*/, WPARAM wParam, LPARAM lParam, BOOL& /*bHandled*/);
+		LRESULT OnDdeInitiate(UINT /*uMsg*/, WPARAM wParam, LPARAM lParam, BOOL& /*bHandled*/);
+		LRESULT OnDdeExecute(UINT /*uMsg*/, WPARAM wParam, LPARAM lParam, BOOL& /*bHandled*/);
+
+		LRESULT OnDdeAck(UINT /*uMsg*/, WPARAM wParam, LPARAM lParam, BOOL& /*bHandled*/);
+		LRESULT OnDdeTerminate(UINT /*uMsg*/, WPARAM wParam, LPARAM lParam, BOOL& /*bHandled*/);
+		// vds: <<
+
 	public:
 
 //		shared_ptr<ConsoleView> GetActiveView();
 
 		void AdjustWindowRect(CRect& rect);
 //		void AdjustAndResizeConsoleView(CRect& rectView);
+
+		bool SendDdeExecuteCommand(HWND hPrevConsole, LPTSTR lpstrCmdLine); // vds:
 
 	private:
 
@@ -225,7 +257,10 @@ class MainFrame
 		void CreateStatusBar();
 		BOOL SetTrayIcon(DWORD dwMessage);
 
+		ConsoleView* LookupTab(shared_ptr<TabData> tabData, wstring startupDir); // vds: Reuse exising tab
+
 	private:
+		void CreateNewTab(wchar_t *lpstrCmdLine);
 
 		bool					m_bOnCreateDone;
 
@@ -233,6 +268,7 @@ class MainFrame
 		const vector<wstring>&	m_startupDirs;
 		const vector<wstring>&	m_startupCmds;
 		int						m_nMultiStartSleep;
+		bool					m_bOneInstance; // vds:
 		wstring					m_strDbgCmdLine;
 
 		shared_ptr<ConsoleView>	m_activeView;
@@ -276,6 +312,11 @@ class MainFrame
 
 		shared_ptr<AnimationWindow>	m_animationWindow;
 
+		// vds: >>
+		bool			m_refuseDdeExecuteMessage;
+		UINT			m_currentDdeMsg;
+		HWND			m_hDdeServerWnd;
+		// vds: <<
 };
 
 //////////////////////////////////////////////////////////////////////////////

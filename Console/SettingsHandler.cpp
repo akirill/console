@@ -1021,8 +1021,324 @@ AnimateSettings& AnimateSettings::operator=(const AnimateSettings& other)
 
 //////////////////////////////////////////////////////////////////////////////
 
+// vds: >>
+OneInstanceSettings::OneInstanceSettings()
+: bAllowMultipleInstances(true)
+, bReuseTab(false)
+, bReuseBusyTab(false)
+{
+}
+// vds: <<
 
 //////////////////////////////////////////////////////////////////////////////
+
+
+// vds: >>
+//////////////////////////////////////////////////////////////////////////////
+
+bool OneInstanceSettings::Load(const CComPtr<IXMLDOMElement>& pSettingsRoot)
+{
+	CComPtr<IXMLDOMElement>	pOneInstanceElement;
+
+	if (FAILED(XmlHelper::GetDomElement(pSettingsRoot, CComBSTR(L"behavior/one_instance"), pOneInstanceElement))) {
+		// If the one_instance tag is not present create it.
+		CComPtr<IXMLDOMElement>	pBehaviorElement;
+		if (FAILED(XmlHelper::GetDomElement(pSettingsRoot, CComBSTR(L"behavior"), pBehaviorElement))) return false;
+
+		CComPtr<IXMLDOMDocument> pSettingsDoc;
+		pSettingsRoot->get_ownerDocument(&pSettingsDoc);
+
+		CComPtr<IXMLDOMNode>	pOneInstanceOut;
+
+		if (FAILED(pSettingsDoc->createElement(CComBSTR(L"one_instance"), &pOneInstanceElement)))
+			return false;
+
+		pBehaviorElement->appendChild(pOneInstanceElement, &pOneInstanceOut);
+		SettingsBase::AddTextNode(pSettingsDoc, pBehaviorElement, CComBSTR(L"\n\t"));
+	}
+
+	XmlHelper::GetAttribute(pOneInstanceElement, CComBSTR(L"allow_multiple_intances"), bAllowMultipleInstances, true);
+	XmlHelper::GetAttribute(pOneInstanceElement, CComBSTR(L"reuse_tab"), bReuseTab, false);
+	XmlHelper::GetAttribute(pOneInstanceElement, CComBSTR(L"reuse_busy_tab"), bReuseBusyTab, false);
+
+	return true;
+}
+
+//////////////////////////////////////////////////////////////////////////////
+
+
+//////////////////////////////////////////////////////////////////////////////
+
+bool OneInstanceSettings::Save(const CComPtr<IXMLDOMElement>& pSettingsRoot)
+{
+	CComPtr<IXMLDOMElement>	pOneInstanceElement;
+
+	if (FAILED(XmlHelper::GetDomElement(pSettingsRoot, CComBSTR(L"behavior/one_instance"), pOneInstanceElement))) {
+			return false;
+	}
+
+	XmlHelper::SetAttribute(pOneInstanceElement, CComBSTR(L"allow_multiple_intances"), bAllowMultipleInstances);
+	XmlHelper::SetAttribute(pOneInstanceElement, CComBSTR(L"reuse_tab"), bReuseTab);
+	XmlHelper::SetAttribute(pOneInstanceElement, CComBSTR(L"reuse_busy_tab"), bReuseBusyTab);
+
+	return true;
+}
+
+//////////////////////////////////////////////////////////////////////////////
+
+//////////////////////////////////////////////////////////////////////////////
+
+OneInstanceSettings& OneInstanceSettings::operator=(const OneInstanceSettings& other)
+{
+	bAllowMultipleInstances	= other.bAllowMultipleInstances;
+	bReuseTab				= other.bReuseTab;
+	bReuseBusyTab			= other.bReuseBusyTab;
+
+	return *this;
+}
+
+//////////////////////////////////////////////////////////////////////////////
+
+//////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////
+
+//////////////////////////////////////////////////////////////////////////////
+
+ShellSettings::ShellSettings()
+: bRunConsoleMenItem(true)
+, bRunConsoleTabMenuItem(true)
+{
+}
+
+//////////////////////////////////////////////////////////////////////////////
+
+bool ShellSettings::Load(const CComPtr<IXMLDOMElement>& pSettingsRoot)
+{
+	CComPtr<IXMLDOMElement>	pShellElement;
+
+	if (FAILED(XmlHelper::GetDomElement(pSettingsRoot, CComBSTR(L"behavior/shell_integration"), pShellElement))) {
+		// If the one_instance tag is not present create it.
+		CComPtr<IXMLDOMElement>	pBehaviorElement;
+		if (FAILED(XmlHelper::GetDomElement(pSettingsRoot, CComBSTR(L"behavior"), pBehaviorElement))) return false;
+
+		CComPtr<IXMLDOMDocument> pSettingsDoc;
+		pSettingsRoot->get_ownerDocument(&pSettingsDoc);
+
+		CComPtr<IXMLDOMNode>	pShellOut;
+
+		if (FAILED(pSettingsDoc->createElement(CComBSTR(L"shell_integration"), &pShellElement)))
+			return false;
+
+		pBehaviorElement->appendChild(pShellElement, &pShellOut);
+		SettingsBase::AddTextNode(pSettingsDoc, pBehaviorElement, CComBSTR(L"\n\t"));
+	}
+
+	XmlHelper::GetAttribute(pShellElement, CComBSTR(L"run_console_menu_item"), bRunConsoleMenItem, true);
+	XmlHelper::GetAttribute(pShellElement, CComBSTR(L"run_console_tab_menu_item"), bRunConsoleTabMenuItem, true);
+
+	return true;
+}
+
+//////////////////////////////////////////////////////////////////////////////
+
+
+//////////////////////////////////////////////////////////////////////////////
+
+bool ShellSettings::Save(const CComPtr<IXMLDOMElement>& pSettingsRoot)
+{
+	CComPtr<IXMLDOMElement>	pShellElement;
+
+	if (FAILED(XmlHelper::GetDomElement(pSettingsRoot, CComBSTR(L"behavior/shell_integration"), pShellElement))) {
+			return false;
+	}
+
+	XmlHelper::SetAttribute(pShellElement, CComBSTR(L"run_console_menu_item"), bRunConsoleMenItem);
+	XmlHelper::SetAttribute(pShellElement, CComBSTR(L"run_console_tab_menu_item"), bRunConsoleTabMenuItem);
+
+	return true;
+}
+
+//////////////////////////////////////////////////////////////////////////////
+
+
+//////////////////////////////////////////////////////////////////////////////
+
+bool IsKeyPresent(TCHAR *path) 
+{
+	HKEY key;
+
+	if (RegOpenKeyEx(HKEY_CLASSES_ROOT, path, 0, KEY_READ, &key) != ERROR_SUCCESS)
+		return false;
+
+	RegCloseKey(key);
+	return true;
+}
+
+//////////////////////////////////////////////////////////////////////////////
+
+
+//////////////////////////////////////////////////////////////////////////////
+
+bool ShellSettings::IsConsoleIntegratedWithExplorer()
+{
+#if 1
+	if (!IsKeyPresent(_T("*\\shellex\\ContextMenuHandlers\\Console")))
+		return false;
+
+	if (!IsKeyPresent(_T("Directory\\shellex\\ContextMenuHandlers\\Console")))
+		return false;
+
+	if (!IsKeyPresent(_T("Directory\\Background\\shellex\\ContextMenuHandlers\\Console")))
+		return false;
+#else
+	if (!IsKeyPresent(_T("*\\shell\\console")))
+		return false;
+
+	if (!IsKeyPresent(_T("*\\shell\\console\\command")))
+		return false;
+
+	if (!IsKeyPresent(_T("*\\shell\\console\\ddeexec")))
+		return false;
+
+	if (!IsKeyPresent(_T("*\\shell\\console\\ddeexec\\Application")))
+		return false;
+
+	if (!IsKeyPresent(_T("*\\shell\\console\\ddeexec\\Topic")))
+		return false;
+
+
+	if (!IsKeyPresent(_T("Directory\\shell\\Console")))
+		return false;
+
+	if (!IsKeyPresent(_T("Directory\\shell\\Console\\command")))
+		return false;
+
+	if (!IsKeyPresent(_T("Directory\\shell\\Console\\ddeexec")))
+		return false;
+
+	if (!IsKeyPresent(_T("Directory\\shell\\Console\\ddeexec\\Application")))
+		return false;
+
+	if (!IsKeyPresent(_T("Directory\\shell\\Console\\ddeexec\\Topic")))
+		return false;
+#endif
+
+	return true;
+}
+
+void SetKeyValue(TCHAR *path, TCHAR *value)
+{
+	HKEY key;
+
+	if (RegCreateKey(HKEY_CLASSES_ROOT, path, &key) != ERROR_SUCCESS)
+		return;
+	RegCloseKey(key);
+
+	RegSetValue(HKEY_CLASSES_ROOT, path, REG_SZ, value, _tcslen(value) * sizeof(TCHAR));
+}
+
+bool ShellSettings::CouldIntegrateConsoleWithExplorer()
+{
+	HKEY key;
+	LSTATUS status = RegOpenKeyEx(HKEY_CLASSES_ROOT, _T("*\\shellex\\ContextMenuHandlers\\Console"), 0, KEY_SET_VALUE, &key);
+	if (status == ERROR_SUCCESS) {
+		RegCloseKey(key);
+		return True;
+	}
+	else {
+		return False;
+	}
+}
+
+void ShellSettings::IntegrateConsoleWithExplorer(bool integrate)
+{
+#if 1
+	if (integrate) {
+		SetKeyValue(_T("*\\shellex\\ContextMenuHandlers\\Console"), _T("{88076FF3-A8B5-4059-AB7D-9D7DEF3792FD}"));
+		SetKeyValue(_T("Directory\\shellex\\ContextMenuHandlers\\Console"), _T("{88076FF3-A8B5-4059-AB7D-9D7DEF3792FD}"));
+		SetKeyValue(_T("Directory\\Background\\shellex\\ContextMenuHandlers\\Console"), _T("{88076FF3-A8B5-4059-AB7D-9D7DEF3792FD}"));
+		SetKeyValue(_T("Drive\\shellex\\ContextMenuHandlers\\Console"), _T("{88076FF3-A8B5-4059-AB7D-9D7DEF3792FD}"));
+
+		HMODULE hExplorerIntegration = LoadLibrary(_T("ExplorerIntegration.dll"));
+		if (!hExplorerIntegration)
+			return;
+
+		typedef void (*DllRegisterServer)();
+		DllRegisterServer registerServer = reinterpret_cast<DllRegisterServer>(GetProcAddress(hExplorerIntegration, "DllRegisterServer"));
+		registerServer();
+
+		FreeLibrary(hExplorerIntegration);
+	}
+	else {
+		HRESULT result;
+		result = RegDeleteKey(HKEY_CLASSES_ROOT, _T("*\\shellex\\ContextMenuHandlers\\Console"));
+		result = RegDeleteKey(HKEY_CLASSES_ROOT, _T("Directory\\shellex\\ContextMenuHandlers\\Console"));
+		result = RegDeleteKey(HKEY_CLASSES_ROOT, _T("Directory\\Background\\shellex\\ContextMenuHandlers\\Console"));
+		result = RegDeleteKey(HKEY_CLASSES_ROOT, _T("Drive\\shellex\\ContextMenuHandlers\\Console"));
+
+		HMODULE hExplorerIntegration = LoadLibrary(_T("ExplorerIntegration.dll"));
+		if (!hExplorerIntegration)
+			return;
+
+		typedef void (*DllUnregisterServer)();
+		DllUnregisterServer unRegisterServer = reinterpret_cast<DllUnregisterServer>(GetProcAddress(hExplorerIntegration, "DllRegisterServer"));
+		unRegisterServer();
+
+		FreeLibrary(hExplorerIntegration);
+	}
+#else
+	TCHAR module[512];
+	GetModuleFileName(0, module, sizeof(module) / sizeof(TCHAR) - 1);
+
+	TCHAR line[512];
+	_sntprintf_s(line, sizeof(line) / sizeof(TCHAR) - 1, _T("%s -d \"%%1\""), module);
+
+	if (integrate) {
+		SetKeyValue(_T("*\\shell\\console"), _T("&Console"));
+		SetKeyValue(_T("*\\shell\\console\\command"), line);
+		SetKeyValue(_T("*\\shell\\console\\ddeexec"), _T("[Open(-d \"%1\")]"));
+		SetKeyValue(_T("*\\shell\\console\\ddeexec\\Application"), _T("Console"));
+		SetKeyValue(_T("*\\shell\\console\\ddeexec\\Topic"), _T("System"));
+
+		SetKeyValue(_T("Directory\\shell\\Console"), _T("&Console"));
+		SetKeyValue(_T("Directory\\shell\\Console\\command"), line);
+		SetKeyValue(_T("Directory\\shell\\Console\\ddeexec"), _T("[Open(-d \"%1\")]"));
+		SetKeyValue(_T("Directory\\shell\\Console\\ddeexec\\Application"), _T("Console"));
+		SetKeyValue(_T("Directory\\shell\\Console\\ddeexec\\Topic"), _T("System"));
+	}
+	else {
+		HRESULT result;
+		result = RegDeleteKey(HKEY_CLASSES_ROOT, _T("*\\shell\\Console\\ddeexec\\Application"));
+		result = RegDeleteKey(HKEY_CLASSES_ROOT, _T("*\\shell\\Console\\ddeexec\\Topic"));
+		result = RegDeleteKey(HKEY_CLASSES_ROOT, _T("*\\shell\\Console\\ddeexec"));
+		result = RegDeleteKey(HKEY_CLASSES_ROOT, _T("*\\shell\\Console\\command"));
+		result = RegDeleteKey(HKEY_CLASSES_ROOT, _T("*\\shell\\Console"));
+
+		result = RegDeleteKey(HKEY_CLASSES_ROOT, _T("Directory\\shell\\Console\\ddeexec\\Application"));
+		result = RegDeleteKey(HKEY_CLASSES_ROOT, _T("Directory\\shell\\Console\\ddeexec\\Topic"));
+		result = RegDeleteKey(HKEY_CLASSES_ROOT, _T("Directory\\shell\\Console\\ddeexec"));
+		result = RegDeleteKey(HKEY_CLASSES_ROOT, _T("Directory\\shell\\Console\\command"));
+		result = RegDeleteKey(HKEY_CLASSES_ROOT, _T("Directory\\shell\\Console"));
+	}
+#endif
+}
+
+//////////////////////////////////////////////////////////////////////////////
+
+
+//////////////////////////////////////////////////////////////////////////////
+
+ShellSettings& ShellSettings::operator=(const ShellSettings& other)
+{
+	bRunConsoleMenItem		= other.bRunConsoleMenItem;
+	bRunConsoleTabMenuItem	= other.bRunConsoleTabMenuItem;
+
+	return *this;
+}
+
+//////////////////////////////////////////////////////////////////////////////
+// vds: <<
+
 //////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////
 
@@ -1044,6 +1360,8 @@ bool BehaviorSettings::Load(const CComPtr<IXMLDOMElement>& pSettingsRoot)
 	scrollSettings.Load(pSettingsRoot);
 	tabHighlightSettings.Load(pSettingsRoot);
 //	animateSettings.Load(pSettingsRoot);
+	oneInstanceSettings.Load(pSettingsRoot); // vds:
+	shellSettings.Load(pSettingsRoot); // vds:
 	return true;
 }
 
@@ -1058,6 +1376,8 @@ bool BehaviorSettings::Save(const CComPtr<IXMLDOMElement>& pSettingsRoot)
 	scrollSettings.Save(pSettingsRoot);
 	tabHighlightSettings.Save(pSettingsRoot);
 //	animateSettings.Save(pSettingsRoot);
+	oneInstanceSettings.Save(pSettingsRoot); // vds:
+	shellSettings.Save(pSettingsRoot); // vds:
 	return true;
 }
 
@@ -1072,6 +1392,8 @@ BehaviorSettings& BehaviorSettings::operator=(const BehaviorSettings& other)
 	scrollSettings		= other.scrollSettings;
 	tabHighlightSettings= other.tabHighlightSettings;
 //	animateSettings		= other.animateSettings;
+	oneInstanceSettings	= other.oneInstanceSettings; // vds:
+	shellSettings		= other.shellSettings; // vds:
 
 	return *this;
 }
@@ -1729,6 +2051,84 @@ void TabSettings::SetDefaults(const wstring& defaultShell, const wstring& defaul
 
 //////////////////////////////////////////////////////////////////////////////
 
+//////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////
+
+// graym: >>
+//////////////////////////////////////////////////////////////////////////////
+
+InternationalizationSettings::InternationalizationSettings():
+strExplorerMenuRunItem(L"Run Console"),
+strExplorerMenuRunWithItem(L"Run Console Tab")
+{
+}
+
+//////////////////////////////////////////////////////////////////////////////
+
+bool InternationalizationSettings::Load(const CComPtr<IXMLDOMElement>& pSettingsRoot)
+{
+	CComPtr<IXMLDOMElement>	pInternationalizationElement;
+
+	if(FAILED(XmlHelper::GetDomElement(pSettingsRoot, CComBSTR(L"internationalization"), pInternationalizationElement)))
+	{
+		// If the section is not present create it.
+		CComPtr<IXMLDOMDocument> pSettingsDoc;
+		pSettingsRoot->get_ownerDocument(&pSettingsDoc);
+
+		if(FAILED(pSettingsDoc->createElement(CComBSTR(L"internationalization"), &pInternationalizationElement))) return false;
+
+		CComPtr<IXMLDOMNode>	pInternationalizationElementOut;
+		pSettingsRoot->appendChild(pInternationalizationElement,&pInternationalizationElementOut);
+		SettingsBase::AddTextNode(pSettingsDoc, pInternationalizationElement, CComBSTR(L"\n\t"));
+		CComPtr<IXMLDOMElement>	pTRoot;
+		pTRoot = pSettingsRoot;
+		SettingsBase::AddTextNode(pSettingsDoc, pTRoot, CComBSTR(L"\n"));
+	}
+
+	XmlHelper::GetAttribute(pInternationalizationElement, CComBSTR(L"current_language"), strSelectedLanguage, wstring(L"english"));
+
+	// load strings for selected language
+	CComPtr<IXMLDOMElement>	pLanguageElement;
+	CComPtr<IXMLDOMElement>	pElement;
+	if(FAILED(XmlHelper::GetDomElement(pInternationalizationElement, CComBSTR(strSelectedLanguage.c_str()), pLanguageElement))) return true;	///< no such language - use default strings
+
+	// explorer menu items
+	if(SUCCEEDED(XmlHelper::GetDomElement(pLanguageElement, CComBSTR(L"explorer_menu_run"), pElement)))
+		XmlHelper::GetAttribute(pElement, CComBSTR(L"title"), strExplorerMenuRunItem, strExplorerMenuRunItem); pElement=NULL;
+	if(SUCCEEDED(XmlHelper::GetDomElement(pLanguageElement, CComBSTR(L"explorer_menu_run_with"), pElement)))
+		XmlHelper::GetAttribute(pElement, CComBSTR(L"title"), strExplorerMenuRunWithItem, strExplorerMenuRunWithItem); pElement=NULL;
+
+	return true;
+}
+
+bool InternationalizationSettings::Save(const CComPtr<IXMLDOMElement>& pSettingsRoot)
+{
+	CComPtr<IXMLDOMElement>	pInternationalizationElement;
+
+	if (FAILED(XmlHelper::GetDomElement(pSettingsRoot, CComBSTR(L"internationalization"), pInternationalizationElement))) {
+		return false;
+	}
+
+	XmlHelper::SetAttribute(pInternationalizationElement, CComBSTR(L"current_language"), strSelectedLanguage);
+
+	// do not update strings - thay are used read only
+
+	return true;
+}
+
+//////////////////////////////////////////////////////////////////////////////
+
+InternationalizationSettings& InternationalizationSettings::operator=(const InternationalizationSettings& other)
+{
+	strSelectedLanguage = other.strSelectedLanguage;
+	strExplorerMenuRunItem = other.strExplorerMenuRunItem;
+	strExplorerMenuRunWithItem = other.strExplorerMenuRunWithItem;
+
+	return *this;
+}
+
+//////////////////////////////////////////////////////////////////////////////
+// graym: <<
 
 //////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////
@@ -1748,6 +2148,7 @@ SettingsHandler::SettingsHandler()
 , m_hotKeys()
 , m_mouseSettings()
 , m_tabSettings()
+, m_internationalizationSettings() // graym:
 {
 }
 
@@ -1798,6 +2199,7 @@ bool SettingsHandler::LoadSettings(const wstring& strSettingsFileName)
 
 		if (FAILED(hr))
 		{
+			// vds: If user folder open in module folder.
 			m_strSettingsPath	= Helpers::GetModulePath(NULL);
 			m_settingsDirType	= dirTypeExe;
 
@@ -1837,7 +2239,9 @@ bool SettingsHandler::LoadSettings(const wstring& strSettingsFileName)
 							m_pSettingsDocument, 
 							m_pSettingsRoot);
 
-		if (FAILED(hr)) return false;
+		if (FAILED(hr)) {
+			return false;
+		}
 	}
 
 	// load settings' sections
@@ -1849,6 +2253,8 @@ bool SettingsHandler::LoadSettings(const wstring& strSettingsFileName)
 
 	m_tabSettings.SetDefaults(m_consoleSettings.strShell, m_consoleSettings.strInitialDir);
 	m_tabSettings.Load(m_pSettingsRoot);
+
+	m_internationalizationSettings.Load(m_pSettingsRoot); // graym:
 
 	return true;
 }
@@ -1867,6 +2273,8 @@ bool SettingsHandler::SaveSettings()
 	m_mouseSettings.Save(m_pSettingsRoot);
 	m_tabSettings.Save(m_pSettingsRoot);
 
+	m_internationalizationSettings.Save(m_pSettingsRoot); // graym:
+
 	HRESULT hr = m_pSettingsDocument->save(CComVariant(GetSettingsFileName().c_str()));
 
 	return SUCCEEDED(hr) ? true : false;
@@ -1879,21 +2287,36 @@ bool SettingsHandler::SaveSettings()
 
 void SettingsHandler::SetUserDataDir(SettingsDirType settingsDirType)
 {
+	m_settingsDirType = settingsDirType; // vds:
+
 	if (settingsDirType == dirTypeExe)
 	{
 		m_strSettingsPath = Helpers::GetModulePath(NULL);
+		return; // vds:
 	}
-	else if (settingsDirType == dirTypeUser)
+
+	if (settingsDirType == dirTypeUser) // vds:
 	{
 		wchar_t wszAppData[32767];
 		::ZeroMemory(wszAppData, sizeof(wszAppData));
 		::GetEnvironmentVariable(L"APPDATA", wszAppData, _countof(wszAppData));
 
-		m_strSettingsPath = wstring(wszAppData) + wstring(L"\\Console\\");
-		::CreateDirectory(m_strSettingsPath.c_str(), NULL);
-	}
+		// vds: >>
+		if (wszAppData == NULL) {
+			m_strSettingsPath = Helpers::GetModulePath(NULL);
+		}
+		// vds: <<
 
-	m_settingsDirType = settingsDirType;
+		m_strSettingsPath = wstring(wszAppData) + wstring(L"\\Console\\");
+
+		// vds: >>
+		BOOL ret = ::CreateDirectory(m_strSettingsPath.c_str(), NULL);
+		if (!ret && GetLastError() == ERROR_PATH_NOT_FOUND) {
+			m_strSettingsPath = Helpers::GetModulePath(NULL);
+		}
+		return;
+		// vds: <<
+	}
 }
 
 //////////////////////////////////////////////////////////////////////////////

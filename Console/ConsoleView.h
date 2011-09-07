@@ -136,6 +136,11 @@ class ConsoleView
 
 		const CString& GetExceptionMessage() const { return m_exceptionMessage; }
 
+		bool IsWorkingDirFit(wstring workingDir); // vds: Reuse exising tab
+		bool HasChildProcesses(); // vds: Reuse exising tab
+
+		wstring GetWorkingDir(); // vds: New tab with same working dir
+
 	private:
 
 		void OnConsoleChange(bool bResize);

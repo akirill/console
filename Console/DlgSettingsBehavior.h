@@ -31,6 +31,16 @@ class DlgSettingsBehavior
 			DDX_CHECK(IDC_CHECK_FLASH_TAB, m_nFlashInactiveTab)
 			DDX_UINT(IDC_TAB_FLASHES, m_behaviorSettings.tabHighlightSettings.dwFlashes)
 			DDX_CHECK(IDC_CHECK_LEAVE_HIGHLIGHTED, m_nLeaveHighlighted)
+
+			// vds: >>
+			DDX_CHECK(IDC_ALLOW_MULTIPLE_INSTANCES, m_nAllowMultipleInstances)
+			DDX_CHECK(IDC_REUSE_TAB, m_nReuseTab)
+			DDX_CHECK(IDC_REUSE_BUSY_TAB, m_nReuseBusyTab)
+
+			DDX_CHECK(IDC_INTEGRATE_WITH_EXPLORER, m_nIntegrateWithExplorer)
+			DDX_CHECK(IDC_RUN_CONSOLE, m_nRunConsoleMenuItem)
+			DDX_CHECK(IDC_RUN_CONSOLE_TAB, m_nRunConsoleTabMenuItem)
+			// vds: <<
 		END_DDX_MAP()
 
 		BEGIN_MSG_MAP(DlgSettingsBehavior)
@@ -39,6 +49,11 @@ class DlgSettingsBehavior
 			COMMAND_ID_HANDLER(IDCANCEL, OnCloseCmd)
 			COMMAND_RANGE_CODE_HANDLER(IDC_PAGE_SCROLL, IDC_PAGE_SCROLL2, BN_CLICKED, OnClickedScrollType)
 			COMMAND_HANDLER(IDC_CHECK_FLASH_TAB, BN_CLICKED, OnClickedFlashTab)
+
+			// vds: >>
+			COMMAND_HANDLER(IDC_REUSE_TAB, BN_CLICKED, OnClickedReuseTab)
+			COMMAND_HANDLER(IDC_INTEGRATE_WITH_EXPLORER, BN_CLICKED, OnClickedIntegrateWithExplorer)
+			// vds: <<
 		END_MSG_MAP()
 
 // Handler prototypes (uncomment arguments if needed):
@@ -52,11 +67,16 @@ class DlgSettingsBehavior
 		LRESULT OnClickedScrollType(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/);
 		LRESULT OnClickedFlashTab(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/);
 
+		// vds: >>
+		LRESULT OnClickedReuseTab(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/); // vds:
+		LRESULT OnClickedIntegrateWithExplorer(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/); // vds:
+		// vds: <<
+
 	private:
 
 		void EnableScrollControls();
 		void EnableFlashTabControls();
-
+		void EnableOnInstanceControls(); // vds:
 
 	private:
 
@@ -73,6 +93,16 @@ class DlgSettingsBehavior
 
 		int					m_nFlashInactiveTab;
 		int					m_nLeaveHighlighted;
+
+		// vds: >>
+		int					m_nAllowMultipleInstances;
+		int					m_nReuseTab;
+		int					m_nReuseBusyTab;
+
+		int					m_nIntegrateWithExplorer;
+		int					m_nRunConsoleMenuItem;
+		int					m_nRunConsoleTabMenuItem;
+		// vds: <<
 
 };
 

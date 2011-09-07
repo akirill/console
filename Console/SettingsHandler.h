@@ -375,6 +375,47 @@ struct AnimateSettings : public SettingsBase
 
 //////////////////////////////////////////////////////////////////////////////
 
+// vds: >>
+struct OneInstanceSettings : public SettingsBase
+{
+	OneInstanceSettings();
+
+	bool Load(const CComPtr<IXMLDOMElement>& pSettingsRoot);
+	bool Save(const CComPtr<IXMLDOMElement>& pSettingsRoot);
+
+	OneInstanceSettings& operator=(const OneInstanceSettings& other);
+
+	//bool IsConsoleIntegratedWithExplorer();
+	//void IntegrateConsoleWithExplorer(bool integrate);
+
+	bool	bAllowMultipleInstances;
+	bool	bReuseTab;
+	bool	bReuseBusyTab;
+};
+
+struct ShellSettings : public SettingsBase
+{
+	ShellSettings();
+
+	bool Load(const CComPtr<IXMLDOMElement>& pSettingsRoot);
+	bool Save(const CComPtr<IXMLDOMElement>& pSettingsRoot);
+
+	ShellSettings& operator=(const ShellSettings& other);
+
+	bool IsConsoleIntegratedWithExplorer();
+	bool CouldIntegrateConsoleWithExplorer();
+	void IntegrateConsoleWithExplorer(bool integrate);
+
+	bool	bRunConsoleMenItem;
+	bool	bRunConsoleTabMenuItem;
+};
+// vds: <<
+
+//////////////////////////////////////////////////////////////////////////////
+
+
+//////////////////////////////////////////////////////////////////////////////
+
 struct BehaviorSettings : public SettingsBase
 {
 	BehaviorSettings ();
@@ -388,6 +429,8 @@ struct BehaviorSettings : public SettingsBase
 	ScrollSettings			scrollSettings;
 	TabHighlightSettings	tabHighlightSettings;
 //	AnimateSettings			animateSettings;
+	OneInstanceSettings		oneInstanceSettings; // vds:
+	ShellSettings			shellSettings; // vds:
 };
 
 //////////////////////////////////////////////////////////////////////////////
@@ -643,6 +686,29 @@ private:
 
 
 //////////////////////////////////////////////////////////////////////////////
+
+// graynm: >>
+struct InternationalizationSettings : public SettingsBase
+{
+	InternationalizationSettings();
+
+	bool Load(const CComPtr<IXMLDOMElement>& pSettingsRoot);
+	bool Save(const CComPtr<IXMLDOMElement>& pSettingsRoot);
+
+	InternationalizationSettings& operator=(const InternationalizationSettings& other);
+
+	wstring		strSelectedLanguage;	///< if empty - english
+
+	wstring		strExplorerMenuRunItem;
+	wstring		strExplorerMenuRunWithItem;
+};
+
+// graynm: <<
+
+//////////////////////////////////////////////////////////////////////////////
+
+
+//////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////
 
@@ -669,7 +735,7 @@ class SettingsHandler
 		bool LoadSettings(const wstring& strSettingsFileName);
 		bool SaveSettings();
 
-		wstring	GetSettingsFileName() const { return m_strSettingsPath+m_strSettingsFileName; }
+		wstring	GetSettingsFileName() const { return m_strSettingsPath + m_strSettingsFileName; }
 
 		SettingsDirType GetSettingsDirType() const { return m_settingsDirType; }
 		void SetUserDataDir(SettingsDirType settingsDirType);
@@ -680,6 +746,8 @@ class SettingsHandler
 		HotKeys& GetHotKeys() { return m_hotKeys; }
 		MouseSettings& GetMouseSettings() { return m_mouseSettings; }
 		TabSettings& GetTabSettings() { return m_tabSettings; }
+
+		InternationalizationSettings& GetInternationalizationSettings() { return m_internationalizationSettings; } // graynm:
 
 	private:
 
@@ -700,6 +768,8 @@ class SettingsHandler
 		MouseSettings		m_mouseSettings;
 
 		TabSettings			m_tabSettings;
+
+		InternationalizationSettings	m_internationalizationSettings; // graynm:
 };
 
 //////////////////////////////////////////////////////////////////////////////

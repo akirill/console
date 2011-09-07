@@ -1,6 +1,8 @@
 #include "StdAfx.h"
+
 #include "Helpers.h"
 
+//#include "Userenv.h"
 //////////////////////////////////////////////////////////////////////////////
 
 
@@ -43,6 +45,7 @@ wstring Helpers::ExpandEnvironmentStrings(const wstring& str)
 
 //////////////////////////////////////////////////////////////////////////////
 
+#if 0
 wstring Helpers::ExpandEnvironmentStringsForUser(const shared_ptr<void>& userToken, const wstring& str)
 {
 	shared_array<wchar_t> szExpanded(new wchar_t[MAX_PATH]);
@@ -52,6 +55,7 @@ wstring Helpers::ExpandEnvironmentStringsForUser(const shared_ptr<void>& userTok
 
 	return wstring(szExpanded.get());
 }
+#endif
 
 //////////////////////////////////////////////////////////////////////////////
 
