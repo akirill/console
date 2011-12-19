@@ -415,48 +415,17 @@ LRESULT MainFrame::OnEraseBkgnd(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lPara
 
 LRESULT MainFrame::OnClose(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/, BOOL& bHandled)
 {
-	// save settings on exit
-	bool				bSaveSettings		= false;
-	ConsoleSettings&	consoleSettings		= g_settingsHandler->GetConsoleSettings();
-	PositionSettings&	positionSettings	= g_settingsHandler->GetAppearanceSettings().positionSettings;
+	StylesSettings& stylesSettings = g_settingsHandler->GetAppearanceSettings().stylesSettings;
 
-	if (consoleSettings.bSaveSize)
+	if (stylesSettings.bHideOnClose)
 	{
-		consoleSettings.dwRows		= m_dwRows;
-		consoleSettings.dwColumns	= m_dwColumns;
-
-		bSaveSettings = true;
+		ShowWindow(SW_HIDE);
+		return 0;
 	}
 
-	if (positionSettings.bSavePosition)
-	{
-		CRect rectWindow;
+	BOOL handled;
 
-		GetWindowRect(rectWindow);
-
-		positionSettings.nX	= rectWindow.left;
-		positionSettings.nY	= rectWindow.top;
-
-		bSaveSettings = true;
-	}
-
-	if (bSaveSettings) g_settingsHandler->SaveSettings();
-
-	// destroy all views
-	MutexLock viewMapLock(m_viewsMutex);
-	for (ConsoleViewMap::iterator it = m_views.begin(); it != m_views.end(); ++it)
-	{
-		RemoveTab(it->second->m_hWnd);
-		if (m_activeView.get() == it->second.get()) m_activeView.reset();
-		it->second->DestroyWindow();
-	}
-
-	if (g_settingsHandler->GetAppearanceSettings().stylesSettings.bTrayIcon) SetTrayIcon(NIM_DELETE);
-
-	UnregisterGlobalHotkeys();
-
-	DestroyWindow();
-	PostQuitMessage(0);
+	OnFileExit(0, 0, m_hWnd, handled);
 	return 0;
 }
 
@@ -1369,7 +1338,49 @@ LRESULT MainFrame::OnPrevTab(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*
 
 LRESULT MainFrame::OnFileExit(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/)
 {
-	PostMessage(WM_CLOSE);
+	// save settings on exit
+	bool				bSaveSettings		= false;
+	ConsoleSettings&	consoleSettings		= g_settingsHandler->GetConsoleSettings();
+	PositionSettings&	positionSettings	= g_settingsHandler->GetAppearanceSettings().positionSettings;
+	StylesSettings&		stylesSettings		= g_settingsHandler->GetAppearanceSettings().stylesSettings;
+
+	if (consoleSettings.bSaveSize)
+	{
+		consoleSettings.dwRows		= m_dwRows;
+		consoleSettings.dwColumns	= m_dwColumns;
+
+		bSaveSettings = true;
+	}
+
+	if (positionSettings.bSavePosition)
+	{
+		CRect rectWindow;
+
+		GetWindowRect(rectWindow);
+
+		positionSettings.nX	= rectWindow.left;
+		positionSettings.nY	= rectWindow.top;
+
+		bSaveSettings = true;
+	}
+
+	if (bSaveSettings) g_settingsHandler->SaveSettings();
+
+	// destroy all views
+	MutexLock viewMapLock(m_viewsMutex);
+	for (ConsoleViewMap::iterator it = m_views.begin(); it != m_views.end(); ++it)
+	{
+		RemoveTab(it->second->m_hWnd);
+		if (m_activeView.get() == it->second.get()) m_activeView.reset();
+		it->second->DestroyWindow();
+	}
+
+	if (g_settingsHandler->GetAppearanceSettings().stylesSettings.bTrayIcon) SetTrayIcon(NIM_DELETE);
+
+	UnregisterGlobalHotkeys();
+
+	DestroyWindow();
+	PostQuitMessage(0);
 	return 0;
 }
 
