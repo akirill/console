@@ -535,8 +535,16 @@ LRESULT MainFrame::OnHotKey(UINT /*uMsg*/, WPARAM wParam, LPARAM /*lParam*/, BOO
 	{
 		case IDC_GLOBAL_ACTIVATE :
 		{
-			ShowWindow(SW_RESTORE);
-			PostMessage(WM_ACTIVATEAPP, TRUE, 0);
+			if (IsWindowVisible())
+			{
+				ShowWindow(SW_HIDE);
+				PostMessage(WM_ACTIVATEAPP, FALSE, 0);
+			}
+			else
+			{
+				ShowWindow(SW_RESTORE);
+				PostMessage(WM_ACTIVATEAPP, TRUE, 0);
+			}
 
 			POINT	cursorPos;
 			CRect	windowRect;
