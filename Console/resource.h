@@ -322,6 +322,7 @@
 #define ID_NEXT_TAB                     2200
 #define ID_PREV_TAB                     2201
 #define IDC_DUMP_BUFFER                 3000
+#define IDC_CHECK_STYLE_HIDE            4321
 #define IDS_ERR_CANT_START_SHELL        5000
 #define IDS_ERR_CANT_START_AS_USER      5001
 #define IDS_ERR_CANT_START_SHELL_AS_USER 5001
